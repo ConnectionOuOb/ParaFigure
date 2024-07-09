@@ -1,4 +1,5 @@
 String psiblast = """
+Iteration	Word size	Matrix	Open	Extend	Precision	Time(sec)
 3	5	BLOSUM62	10	1	93.146	3761.338
 3	5	BLOSUM62	11	1	93.124	3658.625
 3	5	BLOSUM62	13	1	93.061	3753.592

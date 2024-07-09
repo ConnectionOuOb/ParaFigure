@@ -1,96 +1,101 @@
 import 'data.dart';
-import 'object.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const HPO());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class HPO extends StatelessWidget {
+  const HPO({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Figure',
+      title: 'HPO Figure',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(),
+      home: Text2Figure(
+        setIndex: 5,
+        endIndex: 5,
+        resource: psiblast,
+      ),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class Text2Figure extends StatefulWidget {
+  final int setIndex;
+  final int endIndex;
+  final String resource;
+
+  const Text2Figure({
+    super.key,
+    required this.setIndex,
+    required this.endIndex,
+    required this.resource,
+  });
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<Text2Figure> createState() => _Text2FigureState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  List<Data> instances = [];
-  List<Parameter> parameters = [
-    Parameter(name: 'Iteration', values: []),
-    Parameter(name: 'Word Length', values: []),
-    Parameter(name: 'Matrix', values: []),
-    Parameter(name: 'Gap Open', values: []),
-    Parameter(name: 'Gap Extend', values: []),
-  ];
+class _Text2FigureState extends State<Text2Figure> {
+  Map<double, List<int>> combinations = {};
+  Map<String, List<String>> parameters = {};
 
   @override
   void initState() {
-    for (var line in psiblast.split('\n')) {
-      var parts = line.split('\t');
-      int iteration = int.parse(parts[0]);
-      int wordLength = int.parse(parts[1]);
-      String matrix = parts[2];
-      int gapOpen = int.parse(parts[3]);
-      int gapExtend = int.parse(parts[4]);
+    List<String> lines = psiblast.split('\n');
 
-      instances.add(
-        Data(
-          iteration: iteration,
-          wordLength: wordLength,
-          matrix: matrix,
-          gapOpen: gapOpen,
-          gapExtend: gapExtend,
-          precision: double.parse(parts[5]),
-          time: double.parse(parts[6]),
-        ),
-      );
+    for (var colName in lines[0].split('\t').sublist(0, widget.endIndex)) {
+      parameters[colName] = [];
+    }
 
-      if (!parameters[0].values.contains(iteration.toString())) {
-        parameters[0].values.add(iteration.toString());
+    for (var line in lines.sublist(1)) {
+      var cols = line.split('\t');
+
+      if (cols.length < parameters.keys.length) {
+        continue;
       }
 
-      if (!parameters[1].values.contains(wordLength.toString())) {
-        parameters[1].values.add(wordLength.toString());
-      }
+      int colIndex = 0;
+      for (var colName in parameters.keys) {
+        if (colIndex >= widget.endIndex) {
+          break;
+        }
 
-      if (!parameters[2].values.contains(matrix)) {
-        parameters[2].values.add(matrix);
-      }
+        if (!parameters[colName]!.contains(cols[colIndex])) {
+          parameters[colName]!.add(cols[colIndex]);
+        }
 
-      if (!parameters[3].values.contains(gapOpen.toString())) {
-        parameters[3].values.add(gapOpen.toString());
-      }
-
-      if (!parameters[4].values.contains(gapExtend.toString())) {
-        parameters[4].values.add(gapExtend.toString());
+        colIndex++;
       }
     }
 
-    for (var parameter in parameters) {
-      if (parameter.name == 'Matrix') {
-        parameter.values.sort();
-      } else {
-        parameter.values.sort((a, b) => int.parse(a).compareTo(int.parse(b)));
+    parameters.forEach((key, value) {
+      try {
+        value.sort((a, b) => int.parse(a).compareTo(int.parse(b)));
+      } catch (e) {
+        value.sort((a, b) => a.compareTo(b));
       }
-      print('${parameter.name}: ${parameter.values}');
+    });
+
+    for (var line in lines.sublist(1, 5)) {
+      var cols = line.split('\t');
+      if (cols.length < widget.setIndex - 1) {
+        continue;
+      }
+
+      List<int> classes = [];
+      for (var i = 0; i < widget.setIndex; i++) {
+        classes.add(parameters[parameters.keys.elementAt(i)]!.indexOf(cols[i]));
+      }
+      combinations[double.parse(cols[widget.setIndex])] = classes;
     }
+
     super.initState();
   }
 
@@ -100,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: CustomPaint(
           size: const Size(1200, 800),
-          painter: FigPainter(instances, parameters),
+          painter: FigPainter(),
         ),
       ),
     );
@@ -108,16 +113,16 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class FigPainter extends CustomPainter {
-  final List<Data> instances;
-  final List<Parameter> parameters;
+  //final List<Data> instances;
+  //final List<Parameter> parameters;
 
-  FigPainter(this.instances, this.parameters);
+  FigPainter(/*this.instances, this.parameters*/);
 
   @override
   void paint(Canvas canvas, Size size) {
-    _drawBorder(canvas, size);
+    /*(canvas, size);
     _drawAxis(canvas, size);
-    _drawCurve(canvas, size);
+    _drawLine(canvas, size);*/
   }
 
   _drawBorder(canvas, size) {
@@ -135,6 +140,7 @@ class FigPainter extends CustomPainter {
     );
   }
 
+/*
   _drawAxis(canvas, size) {
     var paint = Paint()
       ..color = Colors.black
@@ -180,32 +186,14 @@ class FigPainter extends CustomPainter {
 
       pointer += interval;
     }
+  }*/
+/*
+  _drawLine(canvas, size) {
+    var paint = Paint()..color = Colors.blue;
+
+    for (var inst in instances) {}
   }
-
-  _drawCurve(canvas, size) {
-    var paint = Paint()
-      ..color = Colors.deepPurple
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
-
-    double padding = 50;
-    double interval = (size.width - padding * 2) / parameters.length;
-    double lineInterval = size.height - padding * 2 - 20;
-
-    for (var i = 0; i < instances.length - 1; i++) {
-      var p1 = instances[i];
-      var p2 = instances[i + 1];
-
-      double x1 = padding + interval * parameters.indexOf(parameters.firstWhere((p) => p.name == 'Iteration'));
-      double x2 = padding + interval * parameters.indexOf(parameters.firstWhere((p) => p.name == 'Iteration', i + 1));
-
-      double y1 = padding + 20 + lineInterval * parameters.firstWhere((p) => p.name == 'Word Length').values.indexOf(p1.wordLength.toString());
-      double y2 = padding + 20 + lineInterval * parameters.firstWhere((p) => p.name == 'Word Length').values.indexOf(p2.wordLength.toString());
-
-      canvas.drawLine(Offset(x1, y1), Offset(x2, y2), paint);
-    }
-  }
-
+*/
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
