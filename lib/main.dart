@@ -84,7 +84,11 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     for (var parameter in parameters) {
-      parameter.values.sort();
+      if (parameter.name == 'Matrix') {
+        parameter.values.sort();
+      } else {
+        parameter.values.sort((a, b) => int.parse(a).compareTo(int.parse(b)));
+      }
       print('${parameter.name}: ${parameter.values}');
     }
     super.initState();
@@ -113,6 +117,7 @@ class FigPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     _drawBorder(canvas, size);
     _drawAxis(canvas, size);
+    _drawCurve(canvas, size);
   }
 
   _drawBorder(canvas, size) {
@@ -133,18 +138,71 @@ class FigPainter extends CustomPainter {
   _drawAxis(canvas, size) {
     var paint = Paint()
       ..color = Colors.black
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 2;
+
+    var textPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
+
+    double padding = 50;
+    double paddingText = 20;
+    double interval = (size.width - padding * 2) / parameters.length;
+    double pointer = padding + interval / 2;
+    double lineInterval = size.height - padding * 2 - paddingText;
+
+    for (var p in parameters) {
+      canvas.drawLine(
+        Offset(pointer, padding + paddingText),
+        Offset(pointer, size.height - padding),
+        paint,
+      );
+
+      textPainter.text = TextSpan(text: p.name, style: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold));
+      textPainter.layout();
+      textPainter.paint(canvas, Offset(pointer - textPainter.width / 2, padding - textPainter.height - 5));
+
+      double valInterval = lineInterval / (p.values.length - 1);
+      double valPointer = padding + paddingText;
+
+      for (var v in p.values) {
+        textPainter.text = TextSpan(text: v, style: const TextStyle(color: Colors.black, fontSize: 20));
+        textPainter.layout();
+        textPainter.paint(
+          canvas,
+          Offset(pointer - textPainter.width / 2 - (p.name == "Matrix" ? 65 : 25), valPointer - textPainter.height / 2),
+        );
+
+        canvas.drawCircle(Offset(pointer, valPointer), 5, paint);
+
+        valPointer += valInterval;
+      }
+
+      pointer += interval;
+    }
+  }
+
+  _drawCurve(canvas, size) {
+    var paint = Paint()
+      ..color = Colors.deepPurple
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 
     double padding = 50;
-    double interval = (size.width - padding) / parameters.length;
+    double interval = (size.width - padding * 2) / parameters.length;
+    double lineInterval = size.height - padding * 2 - 20;
 
-    for (int i = 0; i < parameters.length; i++) {
-      canvas.drawLine(
-        Offset(padding + interval * i, padding),
-        Offset(padding + interval * i, size.height - padding),
-        paint,
-      );
+    for (var i = 0; i < instances.length - 1; i++) {
+      var p1 = instances[i];
+      var p2 = instances[i + 1];
+
+      double x1 = padding + interval * parameters.indexOf(parameters.firstWhere((p) => p.name == 'Iteration'));
+      double x2 = padding + interval * parameters.indexOf(parameters.firstWhere((p) => p.name == 'Iteration', i + 1));
+
+      double y1 = padding + 20 + lineInterval * parameters.firstWhere((p) => p.name == 'Word Length').values.indexOf(p1.wordLength.toString());
+      double y2 = padding + 20 + lineInterval * parameters.firstWhere((p) => p.name == 'Word Length').values.indexOf(p2.wordLength.toString());
+
+      canvas.drawLine(Offset(x1, y1), Offset(x2, y2), paint);
     }
   }
 
