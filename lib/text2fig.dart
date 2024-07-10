@@ -6,21 +6,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 class Text2Figure extends StatefulWidget {
-  final int setIndex;
-  final int endIndex;
+  final int sortColIndex;
+  final int numParameter;
   final int numLayer;
+  final double width;
+  final double height;
   final double padding;
   final double paddingParaName;
   final String resource;
+  final String figureName;
 
   const Text2Figure({
     super.key,
-    required this.setIndex,
-    required this.endIndex,
+    required this.width,
+    required this.height,
+    required this.sortColIndex,
+    required this.numParameter,
     required this.resource,
     this.numLayer = 0,
     this.padding = 30,
     this.paddingParaName = 50,
+    this.figureName = 'fig',
   });
 
   @override
@@ -36,7 +42,7 @@ class _Text2FigureState extends State<Text2Figure> {
   void initState() {
     List<String> lines = widget.resource.split('\n');
 
-    for (var colName in lines[0].split('\t').sublist(0, widget.endIndex)) {
+    for (var colName in lines[0].split('\t').sublist(0, widget.numParameter)) {
       parameters[colName] = [];
     }
 
@@ -49,7 +55,7 @@ class _Text2FigureState extends State<Text2Figure> {
 
       int colIndex = 0;
       for (var colName in parameters.keys) {
-        if (colIndex >= widget.endIndex) {
+        if (colIndex >= widget.numParameter) {
           break;
         }
 
@@ -71,15 +77,17 @@ class _Text2FigureState extends State<Text2Figure> {
 
     for (var line in lines.sublist(1)) {
       var cols = line.split('\t');
-      if (cols.length < widget.setIndex + 1) {
+
+      if (cols.length < widget.sortColIndex) {
         continue;
       }
 
       List<int> classes = [];
-      for (var i = 0; i < widget.setIndex; i++) {
+      for (var i = 0; i < widget.numParameter; i++) {
         classes.add(parameters[parameters.keys.elementAt(i)]!.indexOf(cols[i]));
       }
-      combinations[double.parse(cols[widget.setIndex])] = classes;
+
+      combinations[double.parse(cols[widget.sortColIndex - 1])] = classes;
     }
 
     combinations = Map.fromEntries(combinations.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
@@ -94,7 +102,7 @@ class _Text2FigureState extends State<Text2Figure> {
         child: RepaintBoundary(
           key: _key,
           child: CustomPaint(
-            size: const Size(1200, 800),
+            size: Size(widget.width, widget.height),
             painter: FigPainter(
               numLayer: widget.numLayer,
               padding: widget.padding,
@@ -124,7 +132,7 @@ class _Text2FigureState extends State<Text2Figure> {
       final url = html.Url.createObjectUrlFromBlob(blob);
 
       html.AnchorElement(href: url)
-        ..setAttribute("download", "fig.png")
+        ..setAttribute("download", "${widget.figureName}.png")
         ..click();
 
       html.Url.revokeObjectUrl(url);
