@@ -89,10 +89,13 @@ class FigPainter extends CustomPainter {
         );
         textPainter.layout();
 
-        canvas.drawRect(
-          Rect.fromPoints(
-            Offset(horizontalPointer - textPainter.width - 15, paramNamePointer - textPainter.height / 2),
-            Offset(horizontalPointer - 15, paramNamePointer + textPainter.height / 2),
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromPoints(
+              Offset(horizontalPointer - textPainter.width - 15, paramNamePointer - textPainter.height / 2),
+              Offset(horizontalPointer - 15, paramNamePointer + textPainter.height / 2),
+            ),
+            const Radius.circular(4.0),
           ),
           Paint()..color = Colors.white,
         );
@@ -148,7 +151,7 @@ class FigPainter extends CustomPainter {
         points,
         Paint()
           ..color = Colors.blue.withOpacity(cutoffLayer == 0 ? index / combinations.length : ((index / cutoffIndex).floor() + 1) * cutoffLayer)
-          ..blendMode = BlendMode.srcOut
+          ..blendMode = BlendMode.src
           ..style = PaintingStyle.fill
           ..strokeWidth = 4,
       );
