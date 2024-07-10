@@ -3,11 +3,11 @@ import 'text2fig.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const FigHPO());
+  runApp(FigHPO());
 }
 
 class FigHPO extends StatelessWidget {
-  const FigHPO({super.key});
+  FigHPO({super.key});
 
   @override
   Widget build(BuildContext context) {

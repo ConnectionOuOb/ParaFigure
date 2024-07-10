@@ -1,5 +1,9 @@
 import 'painter.dart';
+import 'dart:ui' as ui;
+import 'dart:html' as html;
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 class Text2Figure extends StatefulWidget {
   final int setIndex;
@@ -24,6 +28,7 @@ class Text2Figure extends StatefulWidget {
 }
 
 class _Text2FigureState extends State<Text2Figure> {
+  final GlobalKey _key = GlobalKey();
   Map<double, List<int>> combinations = {};
   Map<String, List<String>> parameters = {};
 
@@ -86,17 +91,45 @@ class _Text2FigureState extends State<Text2Figure> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: CustomPaint(
-          size: const Size(1200, 800),
-          painter: FigPainter(
-            numLayer: widget.numLayer,
-            padding: widget.padding,
-            paddingParaName: widget.paddingParaName,
-            combinations: combinations,
-            parameters: parameters,
+        child: RepaintBoundary(
+          key: _key,
+          child: CustomPaint(
+            size: const Size(1200, 800),
+            painter: FigPainter(
+              numLayer: widget.numLayer,
+              padding: widget.padding,
+              paddingParaName: widget.paddingParaName,
+              combinations: combinations,
+              parameters: parameters,
+            ),
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          widget2png();
+        },
+        child: const Icon(Icons.save),
+      ),
     );
+  }
+
+  Future<void> widget2png() async {
+    try {
+      RenderRepaintBoundary renderer = _key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await renderer.toImage(pixelRatio: 5);
+      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      Uint8List png = byteData!.buffer.asUint8List();
+      final blob = html.Blob([png]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+
+      html.AnchorElement(href: url)
+        ..setAttribute("download", "fig.png")
+        ..click();
+
+      html.Url.revokeObjectUrl(url);
+    } catch (e) {
+      debugPrint('Error in widget2png: $e');
+    }
   }
 }

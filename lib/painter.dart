@@ -18,14 +18,14 @@ class FigPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    _drawBorder(canvas, size);
     _drawLine(canvas, size);
     _drawAxis(canvas, size);
-    _drawBorder(canvas, size);
   }
 
   _drawBorder(canvas, size) {
     var paint = Paint()
-      ..color = Colors.black
+      ..color = Colors.white
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 
