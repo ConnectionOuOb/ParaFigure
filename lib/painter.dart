@@ -1,12 +1,15 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class FigPainter extends CustomPainter {
+  final int numLayer;
   final double padding;
   final double paddingParaName;
   final Map<double, List<int>> combinations;
   final Map<String, List<String>> parameters;
 
   FigPainter({
+    required this.numLayer,
     required this.padding,
     required this.paddingParaName,
     required this.combinations,
@@ -15,9 +18,9 @@ class FigPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    _drawBorder(canvas, size);
+    _drawLine(canvas, size);
     _drawAxis(canvas, size);
-    /*_drawLine(canvas, size);*/
+    _drawBorder(canvas, size);
   }
 
   _drawBorder(canvas, size) {
@@ -45,10 +48,10 @@ class FigPainter extends CustomPainter {
       textDirection: TextDirection.ltr,
     );
 
-    double horizontalInterval = (size.width - padding * 2) / parameters.keys.length;
-    double horizontalPointer = padding + horizontalInterval / 2;
     double verticalStart = paddingParaName + padding;
     double verticalInterval = size.height - padding * 2 - paddingParaName;
+    double horizontalInterval = (size.width - padding * 2) / parameters.keys.length;
+    double horizontalPointer = padding + horizontalInterval / 2;
 
     for (var p in parameters.keys) {
       canvas.drawLine(
@@ -79,11 +82,21 @@ class FigPainter extends CustomPainter {
       double paramNamePointer = verticalStart;
 
       for (var paraValue in paramNames) {
+        // draw background of text
         textPainter.text = TextSpan(
           text: paraValue,
           style: const TextStyle(color: Colors.black, fontSize: 20),
         );
         textPainter.layout();
+
+        canvas.drawRect(
+          Rect.fromPoints(
+            Offset(horizontalPointer - textPainter.width - 15, paramNamePointer - textPainter.height / 2),
+            Offset(horizontalPointer - 15, paramNamePointer + textPainter.height / 2),
+          ),
+          Paint()..color = Colors.white,
+        );
+
         textPainter.paint(
           canvas,
           Offset(
@@ -105,13 +118,45 @@ class FigPainter extends CustomPainter {
     }
   }
 
-/*
   _drawLine(canvas, size) {
-    var paint = Paint()..color = Colors.blue;
+    int index = 0;
+    double cutoffLayer = numLayer > 0 ? 1 / numLayer : 0;
+    double cutoffIndex = combinations.length / numLayer;
+    double verticalStart = paddingParaName + padding;
+    double verticalInterval = size.height - padding * 2 - paddingParaName;
+    double horizontalInterval = (size.width - padding * 2) / parameters.keys.length;
 
-    for (var inst in instances) {}
+    for (var combination in combinations.entries) {
+      double horizontalPointer = padding + horizontalInterval / 2;
+      List<Offset> points = [];
+
+      for (var paraIndex = 0; paraIndex < parameters.keys.length; paraIndex++) {
+        int numArgs = (parameters[parameters.keys.elementAt(paraIndex)] ?? []).length;
+
+        points.add(
+          Offset(
+            horizontalPointer,
+            verticalStart + verticalInterval / (numArgs - 1) * combination.value[paraIndex],
+          ),
+        );
+
+        horizontalPointer += horizontalInterval;
+      }
+
+      canvas.drawPoints(
+        PointMode.polygon,
+        points,
+        Paint()
+          ..color = Colors.blue.withOpacity(cutoffLayer == 0 ? index / combinations.length : ((index / cutoffIndex).floor() + 1) * cutoffLayer)
+          ..blendMode = BlendMode.srcOut
+          ..style = PaintingStyle.fill
+          ..strokeWidth = 4,
+      );
+
+      index++;
+    }
   }
-*/
+
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

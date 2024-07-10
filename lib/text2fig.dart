@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 class Text2Figure extends StatefulWidget {
   final int setIndex;
   final int endIndex;
+  final int numLayer;
   final double padding;
   final double paddingParaName;
   final String resource;
@@ -13,6 +14,7 @@ class Text2Figure extends StatefulWidget {
     required this.setIndex,
     required this.endIndex,
     required this.resource,
+    this.numLayer = 0,
     this.padding = 30,
     this.paddingParaName = 50,
   });
@@ -75,6 +77,8 @@ class _Text2FigureState extends State<Text2Figure> {
       combinations[double.parse(cols[widget.setIndex])] = classes;
     }
 
+    combinations = Map.fromEntries(combinations.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
+
     super.initState();
   }
 
@@ -85,6 +89,7 @@ class _Text2FigureState extends State<Text2Figure> {
         child: CustomPaint(
           size: const Size(1200, 800),
           painter: FigPainter(
+            numLayer: widget.numLayer,
             padding: widget.padding,
             paddingParaName: widget.paddingParaName,
             combinations: combinations,
