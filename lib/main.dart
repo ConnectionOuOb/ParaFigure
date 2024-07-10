@@ -3,11 +3,11 @@ import 'text2fig.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(FigHPO());
+  runApp(const FigHPO());
 }
 
 class FigHPO extends StatelessWidget {
-  FigHPO({super.key});
+  const FigHPO({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class FigHPO extends StatelessWidget {
       home: Text2Figure(
         setIndex: 5,
         endIndex: 5,
-        resource: psiblast,
+        resource: data,
       ),
     );
   }
