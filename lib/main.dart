@@ -19,9 +19,12 @@ class FigHPO extends StatelessWidget {
         useMaterial3: true,
       ),
       home: Text2Figure(
-        setIndex: 5,
-        endIndex: 5,
-        resource: psiblast,
+        width: 1200,
+        height: 800,
+        figureName: "NCBI BLAST blastp Speed",
+        numParameter: 4,
+        sortColIndex: 6,
+        resource: data,
       ),
     );
   }
