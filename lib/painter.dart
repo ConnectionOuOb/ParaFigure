@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
@@ -64,7 +65,7 @@ class FigPainter extends CustomPainter {
         text: p,
         style: const TextStyle(
           color: Colors.black,
-          fontSize: 20,
+          fontSize: 23,
           fontWeight: FontWeight.bold,
         ),
       );
@@ -85,19 +86,19 @@ class FigPainter extends CustomPainter {
         // draw background of text
         textPainter.text = TextSpan(
           text: paraValue,
-          style: const TextStyle(color: Colors.black, fontSize: 20),
+          style: const TextStyle(color: Colors.black, fontSize: 22),
         );
         textPainter.layout();
 
         canvas.drawRRect(
           RRect.fromRectAndRadius(
             Rect.fromPoints(
-              Offset(horizontalPointer - textPainter.width - 15, paramNamePointer - textPainter.height / 2),
-              Offset(horizontalPointer - 15, paramNamePointer + textPainter.height / 2),
+              Offset(horizontalPointer - textPainter.width - 20, paramNamePointer - textPainter.height / 2 - 5),
+              Offset(horizontalPointer - 10, paramNamePointer + textPainter.height / 2 + 5),
             ),
-            const Radius.circular(4.0),
+            const Radius.circular(10),
           ),
-          Paint()..color = Colors.white,
+          Paint()..color = Colors.grey.shade300,
         );
 
         textPainter.paint(
@@ -123,8 +124,6 @@ class FigPainter extends CustomPainter {
 
   _drawLine(canvas, size) {
     int index = 0;
-    double cutoffLayer = numLayer > 0 ? 1 / numLayer : 0;
-    double cutoffIndex = combinations.length / numLayer;
     double verticalStart = paddingParaName + padding;
     double verticalInterval = size.height - padding * 2 - paddingParaName;
     double horizontalInterval = (size.width - padding * 2) / parameters.keys.length;
@@ -150,10 +149,10 @@ class FigPainter extends CustomPainter {
         PointMode.polygon,
         points,
         Paint()
-          ..color = Colors.blue.withOpacity(cutoffLayer == 0 ? index / combinations.length : ((index / cutoffIndex).floor() + 1) * cutoffLayer)
+          ..color = getLayerColor(index, combinations.length)
           ..blendMode = BlendMode.src
           ..style = PaintingStyle.fill
-          ..strokeWidth = 4,
+          ..strokeWidth = 5 * pow(index / combinations.length, 6).toDouble() + (index == combinations.length - 1 ? 5 : 2),
       );
 
       index++;
@@ -162,4 +161,19 @@ class FigPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+Color getLayerColor(int index, int totalLayers) {
+  if (index == totalLayers - 1) {
+    return Colors.black;
+  }
+
+  Color startColor = Colors.lightBlue.shade100;
+  Color endColor = Colors.blueAccent.shade700;
+
+  double t = index / (totalLayers - 2);
+
+  t = pow(t, 10).toDouble();
+
+  return Color.lerp(startColor, endColor, t) ?? Colors.grey;
 }
