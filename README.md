@@ -1,5 +1,5 @@
 # ParaFigure
-### A high resolution figure generator of hyperparameter opitimation results
+### A high resolution figure generator of hyper parameter optimisation results
 
 ## Download
 - ```git clone https://github.com/ConnectionOuOb/ParaFigure.git```
